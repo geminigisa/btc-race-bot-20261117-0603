@@ -2,13 +2,13 @@
 
 Strategi
 --------
-Satu posisi long CBBTC/USDC, 100% kas per entry, maksimal 4 trip dalam
+Satu posisi long CBBTC/USDC, 100% kas per entry, maksimal 1 trip dalam
 jendela 1440 bar (1 menit). Entry hanya saat harga turun (dip) dari
 tertinggi 45 bar terakhir lalu memantul kembali:
 
-* dip: close turun >= dip_bps (40 bps) dari max close 45 bar terakhir;
+* dip: close turun >= dip_bps (15 bps) dari max close 45 bar terakhir;
 * dip_low dicatat (harga terendah selama fase dip) dan dip_age dihitung;
-* entry butuh close memantul >= bounce_bps (10 bps) di atas dip_low,
+* entry butuh close memantul >= bounce_bps (5 bps) di atas dip_low,
   close harus berada di atas SMA(trend_n=60) (filter tren),
   dan dip_age tidak boleh melewati dip_max_age (30 bar);
 * filter RSI(14) dan ATR(20) tersedia tapi nonaktif di parameter final
@@ -16,10 +16,20 @@ tertinggi 45 bar terakhir lalu memantul kembali:
 
 Exit satu posisi, yang mana dulu tercapai:
 
-* take-profit tp_bps (70 bps) di atas cost (atau trailing bila
-  trail_bps diisi), stop-loss sl_bps (50 bps) di bawah cost,
-  max_hold (180 bar), atau norecov (bila diisi: masih rugi setelah
+* take-profit tp_bps (30 bps) di atas cost (atau trailing bila
+  trail_bps diisi), stop-loss sl_bps (40 bps) di bawah cost,
+  max_hold (60 bar), atau norecov (bila diisi: masih rugi setelah
   norecov_bars bar).
+
+Satu trip disengaja: varian 4-trip yang sama mencetak +$4,92 di dev
+window race ini tapi -$26,21 / -$23,13 di dev window 13/15 Nov yang
+turun, sementara varian 1-trip ini positif di dua dari tiga jendela
+turun dan kerugian terburuknya hanya -$5,92. Dipilih setelah sweep
+~1.100 kombinasi dan konsultasi second brain independen.
+
+Terverifikasi: harness lokal kit --twice pada dev window
+btc-race-24h-20261117-0603: net PnL +$1,47 (1 trip), max drawdown
+0,21%, deterministik, dev gate lolos.
 
 Protokol
 --------
@@ -167,6 +177,8 @@ def on_batch(state, batch):
         return []
 
     # 5. ENTRY: bila tidak memegang posisi.
+    # Satu trip saja per jendela: membatasi kerugian bila live window
+    # ternyata turun (varian 4-trip kehilangan -$26 di jendela turun).
     if trips_started >= P["max_trips"]:
         return []
     if len(closes) < P["high_n"]:
