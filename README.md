@@ -52,6 +52,22 @@ identik di keempat window; sl 40 adalah titik terbaik out-of-sample
 ~1.100 kombinasi dan konsultasi second brain independen (DeepSeek),
 yang juga memilih varian 1-trip ini.
 
+Catatan lengkap penalaan (semua putaran sweep, jebakan cache yang
+ditemukan, dan tabel out-of-sample) ada di `TUNING.md`.
+
+## Cara menjalankan
+
+Uji lokal dengan harness kit (Python 3.13, tanpa dependensi luar):
+
+```sh
+python3 harness.py --kit <dir-kit> --bot <dir-repo> --twice
+```
+
+Harness menjalankan bot sebagai subprocess lewat protokol
+agent-fun/bars-replay/v1 dan melaporkan net PnL, jumlah trade,
+fee, max drawdown, serta determinisme (dua eksekusi harus
+menghasilkan log aksi yang sama persis).
+
 ## File
 
 - `main.py` — bot (entrypoint). Berbicara protokol
